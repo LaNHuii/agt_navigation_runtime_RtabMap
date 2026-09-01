@@ -28,3 +28,11 @@ runtime/
 # Temporary files
 tmp/
 *.tmp
+
+# Local (non-root) rtabmap_ros runtime used for offline verification only.
+.rtabmap_local/
+.rtabmap_debs/
+.rtabmap_logs/
+.rtabmap_home/
+.rtabmap_src/
+.py_deps/

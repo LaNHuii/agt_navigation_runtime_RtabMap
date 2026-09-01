@@ -1,0 +1,20 @@
+# agt_rtabmap_backend — AGT contract adapter parameters.
+#
+# The adapter consumes the RTAB-Map backend odometry and the raw PointCloud2
+# scan, then re-publishes them under the public AGT mapping contract shared
+# with the FAST-LIVO2 backend:
+#   /agt/mapping/odometry          (odom -> base_footprint, + TF)
+#   /agt/mapping/registered_points (current scan in odom frame)
+/**:
+  ros__parameters:
+    input_odometry: /rtabmap/odom
+    output_odometry: /agt/mapping/odometry
+    input_scan_cloud: /agt/sensors/lidar/points
+    output_registered_points: /agt/mapping/registered_points
+    registered_points_frame: odom
+    odom_frame: odom
+    # RTAB-Map ICP odometry body frame is the LiDAR frame.
+    backend_body_frame: lidar_link
+    base_frame: base_footprint
+    publish_tf: true
+    transform_timeout: 0.1

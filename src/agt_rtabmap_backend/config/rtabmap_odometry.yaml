@@ -1,0 +1,43 @@
+# agt_rtabmap_backend — RTAB-Map ICP odometry node (icp_odometry) parameters.
+#
+# This node consumes the standard PointCloud2 LiDAR topic and produces
+# odometry in `odom_frame_id`, with `frame_id` as the backend body frame
+# (the LiDAR frame). It never publishes TF: the AGT adapter owns
+# `odom -> base_footprint` and the RTAB-Map mapping node owns nothing.
+#
+# All robot-specific values are overridden by rtabmap_mapping.launch.py
+# launch arguments; edit this file only for backend algorithm tuning.
+/**:
+  ros__parameters:
+    # --- backend body / frames ---
+    # RTAB-Map ICP odometry is expressed in the LiDAR frame; the adapter
+    # converts it into base_footprint using the static base->lidar TF.
+    frame_id: lidar_link
+    odom_frame_id: odom
+    publish_tf: false
+    wait_for_transform: 0.100000
+    ground_truth_frame_id: ""
+    ground_truth_base_frame_id: lidar_link
+
+    # --- 3D scan input ---
+    # Topic remapped by launch: /scan_cloud -> lidar_topic
+    # 2D /scan subscription is remapped to a dummy topic by launch.
+    scan_cloud_is_2d: false
+    scan_cloud_max_points: 0
+    scan_downsampling_step: 1
+    scan_voxel_size: 0.1
+    scan_range_min: 0.2
+    scan_range_max: 0.0
+    scan_normal_k: 5
+    scan_normal_radius: 0.0
+    scan_normal_ground_up: 0.0
+
+    # --- deskewing ---
+    # The AGT PointCloud2 standard output has no per-point timing, so
+    # deskewing cannot be applied (MID360 livox point timestamps are not
+    # preserved in the standard cloud).
+    deskewing: false
+    deskewing_slerp: false
+
+    # --- queue / QoS ---
+    topic_queue_size: 10

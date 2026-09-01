@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>agt_rtabmap_backend</name>
+  <version>0.1.0</version>
+  <description>
+    Pluggable RTAB-Map runtime backend for the AGT navigation runtime.
+
+    This package wraps the official rtabmap_ros (Humble) 3D-LiDAR odometry and
+    mapping nodes behind the same public AGT mapping contract that the
+    FAST-LIVO2 backend exposes:
+      - /agt/mapping/odometry       (nav_msgs/Odometry, odom -> base_footprint)
+      - /agt/mapping/registered_points (sensor_msgs/PointCloud2, frame odom)
+      - odom -> base_footprint TF   (sole continuous-odometry publisher)
+
+    The package is self-contained: it depends only on standard ROS 2 message
+    interfaces plus the rtabmap_ros runtime, and can be copied into the
+    agt_navigation_runtime workspace as a drop-in odometry backend.
+  </description>
+  <maintainer email="dev@agt.local">AGT Runtime</maintainer>
+  <license>Apache-2.0</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <depend>rclpy</depend>
+  <depend>nav_msgs</depend>
+  <depend>sensor_msgs</depend>
+  <depend>geometry_msgs</depend>
+  <depend>std_msgs</depend>
+  <depend>tf2_ros</depend>
+  <depend>tf2_sensor_msgs</depend>
+  <depend>python3-numpy</depend>
+
+  <!-- Official rtabmap_ros runtime nodes (installed via rosdep). -->
+  <exec_depend>rtabmap_odom</exec_depend>
+  <exec_depend>rtabmap_slam</exec_depend>
+
+  <test_depend>ament_cmake_pytest</test_depend>
+  <test_depend>python3-pytest</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

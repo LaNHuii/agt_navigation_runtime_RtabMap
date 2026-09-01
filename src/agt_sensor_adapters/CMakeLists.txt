@@ -35,12 +35,19 @@ ament_target_dependencies(livox_custom_self_filter
 )
 target_link_libraries(livox_custom_self_filter agt_sensor_filter_geometry)
 
+add_executable(livox_custom_to_pointcloud2 src/livox_custom_to_pointcloud2.cpp)
+target_compile_features(livox_custom_to_pointcloud2 PRIVATE cxx_std_17)
+ament_target_dependencies(livox_custom_to_pointcloud2
+  livox_ros_driver2 rclcpp sensor_msgs
+)
+
 install(TARGETS agt_sensor_filter_geometry
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin
 )
 install(TARGETS livox_custom_self_filter DESTINATION lib/${PROJECT_NAME})
+install(TARGETS livox_custom_to_pointcloud2 DESTINATION lib/${PROJECT_NAME})
 install(DIRECTORY include/ DESTINATION include)
 
 install(DIRECTORY launch config

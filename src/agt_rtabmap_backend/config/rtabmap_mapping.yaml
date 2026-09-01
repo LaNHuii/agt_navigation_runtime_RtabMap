@@ -1,0 +1,74 @@
+# agt_rtabmap_backend — RTAB-Map mapping node (rtabmap) parameters.
+#
+# Mapping mode: incremental memory is enabled, loop closures refine the graph,
+# and `map_frame_id` equals `odom_frame_id` so that the RTAB-Map world frame is
+# the same continuous odometry frame the rest of the AGT runtime uses. The node
+# publishes no TF (`publish_tf: false`): the AGT adapter is the sole
+# `odom -> base_footprint` publisher and agt_localization's
+# GlobalCorrectionManager is the sole `map -> odom` publisher.
+#
+# All robot-specific values are overridden by rtabmap_mapping.launch.py
+# launch arguments.
+/**:
+  ros__parameters:
+    # --- frames ---
+    frame_id: lidar_link
+    odom_frame_id: odom
+    map_frame_id: odom
+    publish_tf: false
+    tf_delay: 0.05
+    tf_tolerance: 0.1
+    wait_for_transform: 0.100000
+    odom_tf_linear_variance: 0.0
+    odom_tf_angular_variance: 0.0
+
+    # --- subscriptions ---
+    subscribe_odom: true
+    subscribe_scan_cloud: true
+    subscribe_scan: false
+    subscribe_depth: false
+    subscribe_rgb: false
+    subscribe_rgbd: false
+    subscribe_stereo: false
+    subscribe_odom_info: false
+    scan_cloud_is_2d: false
+    scan_cloud_max_points: 0
+    # Topics are remapped by launch (/scan_cloud -> lidar_topic,
+    # /odom -> backend odometry topic).
+
+    # --- database ---
+    # Overridden by launch `database_path`.
+    database_path: runtime/maps/rtabmap/rtabmap.db
+    delete_db_on_start: false
+    use_saved_map: false
+
+    # --- mapping behaviour ---
+    Mem/IncrementalMemory: true
+    RGBD/Enabled: true
+    RGBD/ProximityBySpace: true
+    RGBD/ProximityByTime: false
+    RGBD/OptimizeFromGraphEnd: true
+    RGBD/OptimizeMaxError: 1.0
+    Rtabmap/TimeThr: 700
+    Rtabmap/MemoryThr: 0
+
+    # --- loop-closure ICP ---
+    Icp/VoxelSize: 0.1
+    Icp/CorrespondenceRatio: 0.1
+    Icp/PointToPlane: true
+    Icp/PointToPlaneK: 5
+    Icp/PointToPlaneRadius: 0.0
+    Icp/MaxTranslation: 0.2
+    Icp/MaxRotation: 0.78
+
+    # --- occupancy grid ---
+    # Build the grid from the assembled laser scans (RTAB-Map default when
+    # subscribe_scan_cloud is true).
+    Grid/Sensor: 0
+    Grid/RangeMax: 30.0
+    Grid/CellSize: 0.05
+
+    # --- cloud map output (debug / visualization) ---
+    # cloud_map / cloud_obstacles / cloud_ground are published on demand when
+    # subscribers exist (RTAB-Map 0.23 MapsManager).
+    cloud_output_voxelized: true

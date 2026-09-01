@@ -13,6 +13,9 @@ ros2 launch agt_sensor_adapters mid360.launch.py
   `offset_time/line/tag` 的原始输入，供自滤除和历史 bag 回放使用；
 - `/agt/sensors/lidar/custom_filtered`：同类型的前置自身点云滤除输出，供
   FAST-LIVO2 使用；通过点仍保持原始 Livox 坐标、顺序和逐点字段，原始 topic 不会被覆盖；
+- `/agt/sensors/lidar/points`：`sensor_msgs/PointCloud2`（x/y/z/intensity），
+  标准点云输出，供 RTAB-Map 等标准 PointCloud2 消费者使用（`livox_points.launch.py`，
+  默认输入为自滤除后的 `custom_filtered`）；
 - `/agt/sensors/imu/data`：MID360 内置 IMU，frame 为 `livox_frame`。
 
 `agt_livox_self_filter` 在 FAST-LIVO2 launch 中默认启动，真实驱动和历史 bag 回放共用

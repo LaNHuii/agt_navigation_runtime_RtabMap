@@ -1,0 +1,58 @@
+# agt_rtabmap_backend — RTAB-Map localization-mode parameters (Phase 5 reserve).
+#
+# This file is intentionally NOT wired into the current launch files. It is the
+# target configuration for the Phase 5 step "RTAB-Map loop closure / global
+# localization integration":
+#
+#   RTAB global pose -> AGT adapter -> /agt/localization/coarse_pose
+#                                   -> GlobalCorrectionManager -> map -> odom
+#
+# Rules that apply once this mode is enabled:
+#   - `publish_tf` MUST stay false: agt_localization's GlobalCorrectionManager
+#     is the only `map -> odom` publisher in the runtime.
+#   - `map_frame_id` becomes the AGT global frame (`map`). RTAB-Map then
+#     optimizes a real map->odom; the adapter converts it to a
+#     PoseWithCovarianceStamped in the `map` frame and publishes it to
+#     `/agt/localization/coarse_pose` (2 s freshness contract).
+#   - `database_path` must point at a previously built mapping database.
+#
+# Before enabling, confirm with the runtime owner which global-localization
+# backend is authoritative (RTAB-Map vs agt_localization ICP/NDT).
+/**:
+  ros__parameters:
+    # --- frames ---
+    frame_id: lidar_link
+    odom_frame_id: odom
+    map_frame_id: map
+    publish_tf: false
+    wait_for_transform: 0.100000
+
+    # --- subscriptions ---
+    subscribe_odom: true
+    subscribe_scan_cloud: true
+    subscribe_scan: false
+    subscribe_depth: false
+    subscribe_rgb: false
+    subscribe_rgbd: false
+    subscribe_stereo: false
+    subscribe_odom_info: false
+    scan_cloud_is_2d: false
+
+    # --- database ---
+    database_path: runtime/maps/rtabmap/rtabmap.db
+    use_saved_map: true
+    delete_db_on_start: false
+
+    # --- localization behaviour ---
+    Mem/IncrementalMemory: false
+    Mem/LocalizationDataSaved: false
+    RGBD/Enabled: true
+    RGBD/ProximityBySpace: true
+    RGBD/ProximityGlobalScanMap: true
+    RGBD/LocalizationSecondTryWithoutProximityLinks: true
+    RGBD/StartAtOrigin: false
+
+    # --- occupancy grid ---
+    Grid/Sensor: 0
+    Grid/RangeMax: 30.0
+    Grid/CellSize: 0.05
