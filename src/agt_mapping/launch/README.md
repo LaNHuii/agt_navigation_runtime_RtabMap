@@ -20,3 +20,21 @@ ros2 launch agt_mapping mapping_backend_demo.launch.py backend:=rtabmap
 ros2 topic hz /agt/mapping/odometry
 ros2 run tf2_ros tf2_echo odom base_footprint
 ```
+
+带 Gazebo 空间感的上位机演示入口：
+
+```bash
+ros2 launch agt_mapping mapping_operator_sim.launch.py backend:=fast_livo2
+ros2 topic pub /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.35}, angular: {z: 0.25}}" -r 5
+ros2 topic hz /agt/mapping/odometry
+ros2 topic hz /agt/mapping/registered_points
+```
+
+停止后可换 RTAB-Map 风格后端重新启动：
+
+```bash
+ros2 launch agt_mapping mapping_operator_sim.launch.py backend:=rtabmap
+```
+
+该演示节点模拟的是上位机检查流程和 AGT mapping contract，不代表真实
+FAST-LIVO2/RTAB-Map 算法精度。

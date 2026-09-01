@@ -8,7 +8,7 @@ install(PROGRAMS
   scripts/fast_livo2_adapter.py
   DESTINATION lib/${PROJECT_NAME}
 )
-install(DIRECTORY launch config patches
+install(DIRECTORY launch config patches rviz worlds
   DESTINATION share/${PROJECT_NAME}
   PATTERN "__pycache__" EXCLUDE
 )

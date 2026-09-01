@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/python3
 """Small operator-facing mapping backend demo.
 
 This node does not replace Gazebo or the real backends. It publishes the same
@@ -51,7 +51,7 @@ class DemoMappingBackend(Node):
         self.last_time = self.get_clock().now()
         self.create_timer(0.05, self.step)
         self.get_logger().info(
-            "demo mapping backend '%s' publishing AGT mapping contract", self.backend
+            f"demo mapping backend '{self.backend}' publishing AGT mapping contract"
         )
 
     def on_cmd_vel(self, msg):

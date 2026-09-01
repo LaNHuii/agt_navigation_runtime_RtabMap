@@ -1,0 +1,50 @@
+<?xml version="1.0" ?>
+<sdf version="1.6">
+  <world name="agt_operator_demo">
+    <include>
+      <uri>model://sun</uri>
+    </include>
+    <include>
+      <uri>model://ground_plane</uri>
+    </include>
+    <model name="north_wall">
+      <pose>0 4 0.5 0 0 0</pose>
+      <static>true</static>
+      <link name="link">
+        <collision name="collision">
+          <geometry><box><size>8 0.12 1.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>8 0.12 1.0</size></box></geometry>
+          <material><ambient>0.35 0.35 0.35 1</ambient></material>
+        </visual>
+      </link>
+    </model>
+    <model name="east_wall">
+      <pose>4 0 0.5 0 0 0</pose>
+      <static>true</static>
+      <link name="link">
+        <collision name="collision">
+          <geometry><box><size>0.12 8 1.0</size></box></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>0.12 8 1.0</size></box></geometry>
+          <material><ambient>0.35 0.35 0.35 1</ambient></material>
+        </visual>
+      </link>
+    </model>
+    <model name="test_pillar">
+      <pose>1.5 -1.0 0.5 0 0 0</pose>
+      <static>true</static>
+      <link name="link">
+        <collision name="collision">
+          <geometry><cylinder><radius>0.25</radius><length>1.0</length></cylinder></geometry>
+        </collision>
+        <visual name="visual">
+          <geometry><cylinder><radius>0.25</radius><length>1.0</length></cylinder></geometry>
+          <material><ambient>0.2 0.55 0.9 1</ambient></material>
+        </visual>
+      </link>
+    </model>
+  </world>
+</sdf>
