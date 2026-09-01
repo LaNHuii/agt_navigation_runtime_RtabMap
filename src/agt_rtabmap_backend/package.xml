@@ -29,6 +29,10 @@
   <depend>tf2_ros</depend>
   <depend>tf2_sensor_msgs</depend>
   <depend>python3-numpy</depend>
+  <depend>agt_sensor_adapters</depend>
+  <exec_depend>ament_index_python</exec_depend>
+  <exec_depend>launch</exec_depend>
+  <exec_depend>launch_ros</exec_depend>
 
   <!-- Official rtabmap_ros runtime nodes (installed via rosdep). -->
   <exec_depend>rtabmap_odom</exec_depend>

@@ -20,6 +20,7 @@
 // both FAST-LIVO2 and RTAB-Map consume the same filtered geometry.
 
 #include <cstring>
+#include <algorithm>
 #include <memory>
 #include <string>
 #include <vector>
@@ -43,7 +44,7 @@ public:
     output_topic_ = declare_parameter<std::string>(
       "output_topic", "/agt/sensors/lidar/points");
     frame_id_ = declare_parameter<std::string>("frame_id", "");
-    queue_depth_ = declare_parameter<int>("queue_depth", 200000);
+    queue_depth_ = declare_parameter<int>("queue_depth", 10);
 
     // Best-effort input accepts both live sensor and rosbag QoS.
     const auto input_qos = rclcpp::SensorDataQoS().keep_last(queue_depth_);
@@ -66,9 +67,16 @@ private:
   void convert(const livox_ros_driver2::msg::CustomMsg::SharedPtr message)
   {
     const auto & points = message->points;
-    const size_t count = message->point_num;
+    const size_t declared_count = message->point_num;
+    const size_t count = std::min(declared_count, points.size());
     if (count == 0) {
       return;
+    }
+    if (declared_count != points.size()) {
+      RCLCPP_WARN_THROTTLE(
+        get_logger(), *get_clock(), 5000,
+        "Livox point_num (%zu) differs from points.size() (%zu); using %zu points",
+        declared_count, points.size(), count);
     }
 
     auto cloud = std::make_unique<sensor_msgs::msg::PointCloud2>();
@@ -117,11 +125,11 @@ private:
     sensor_msgs::PointCloud2Iterator<float> it_z(*cloud, "z");
     // intensity = reflectivity (0..255) kept as float32.
     sensor_msgs::PointCloud2Iterator<float> it_i(*cloud, "intensity");
-    for (const auto & point : points) {
-      *it_x = point.x;
-      *it_y = point.y;
-      *it_z = point.z;
-      *it_i = static_cast<float>(point.reflectivity);
+    for (size_t index = 0; index < count; ++index) {
+      *it_x = points[index].x;
+      *it_y = points[index].y;
+      *it_z = points[index].z;
+      *it_i = static_cast<float>(points[index].reflectivity);
       ++it_x; ++it_y; ++it_z; ++it_i;
     }
     publisher_->publish(std::move(cloud));
@@ -130,7 +138,7 @@ private:
   std::string input_topic_;
   std::string output_topic_;
   std::string frame_id_;
-  int queue_depth_{200000};
+  int queue_depth_{10};
   rclcpp::Subscription<livox_ros_driver2::msg::CustomMsg>::SharedPtr subscription_;
   rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr publisher_;
 };

@@ -7,6 +7,19 @@
 - FAST-LIVO2 的 backend 输入 topic 是 adapter 内部接口，不属于对外 topic contract；adapter
   将其标准化后只对外发布 `/agt/mapping/registered_points`。
 
+建图前可用统一入口选择连续里程计后端。两套后端都会发布同一组 AGT
+mapping contract，禁止同一时间启动：
+
+```bash
+ros2 launch agt_mapping mapping_backend.launch.py backend:=fast_livo2
+ros2 launch agt_mapping mapping_backend.launch.py backend:=rtabmap
+```
+
+`backend:=fast_livo2` 启动 FAST-LIVO2 和 `fast_livo2_adapter.py`；
+`backend:=rtabmap` 启动 Livox CustomMsg 到 PointCloud2 转换器、RTAB-Map ICP
+odometry/mapping，以及 `rtabmap_adapter.py`。切换后端时应先停止当前
+launch，再重新启动另一个后端。
+
 FAST-LIVO2 的正常 MID360 输入为 `/agt/sensors/lidar/custom_filtered`。该 topic 由
 `agt_livox_self_filter` 从保留的原始 `/agt/sensors/lidar/custom` 生成。V2.5 默认
 `geometry_source:=urdf`：过滤器读取当前 `robot_description` 的 collision geometry，在

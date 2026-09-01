@@ -2,7 +2,13 @@ from pathlib import Path
 
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument
+from launch.actions import (
+    DeclareLaunchArgument,
+    IncludeLaunchDescription,
+    SetLaunchConfiguration,
+)
+from launch.conditions import IfCondition, UnlessCondition
+from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 from launch_ros.parameter_descriptions import ParameterValue
@@ -10,6 +16,7 @@ from launch_ros.parameter_descriptions import ParameterValue
 
 def generate_launch_description():
     share = Path(get_package_share_directory("agt_rtabmap_backend"))
+    sensor_share = Path(get_package_share_directory("agt_sensor_adapters"))
     return LaunchDescription(
         [
             # ---------------- robot/sensor parameters (never hard-coded) ----
@@ -40,6 +47,21 @@ def generate_launch_description():
             DeclareLaunchArgument("odom_frame", default_value="odom"),
             DeclareLaunchArgument("map_frame", default_value="odom"),
             DeclareLaunchArgument("use_sim_time", default_value="false"),
+            DeclareLaunchArgument("start_lidar_self_filter", default_value="true"),
+            DeclareLaunchArgument("lidar_custom_topic", default_value="/agt/sensors/lidar/custom"),
+            DeclareLaunchArgument(
+                "lidar_filtered_custom_topic",
+                default_value="/agt/sensors/lidar/custom_filtered",
+            ),
+            DeclareLaunchArgument(
+                "platform_profile",
+                default_value=str(share.parents[3] / "profiles" / "platforms" / "bunker.yaml"),
+            ),
+            DeclareLaunchArgument("lidar_self_filter_geometry_source", default_value="urdf"),
+            DeclareLaunchArgument(
+                "lidar_self_filter_params_file",
+                default_value=str(sensor_share / "config" / "livox_self_filter.yaml"),
+            ),
             DeclareLaunchArgument(
                 "database_path",
                 default_value="runtime/maps/rtabmap/rtabmap.db",
@@ -64,6 +86,40 @@ def generate_launch_description():
                     "Must stay false: the AGT adapter is the sole odom->base TF "
                     "publisher and GlobalCorrectionManager the sole map->odom one"
                 ),
+            ),
+            SetLaunchConfiguration(
+                "rtabmap_livox_input_topic",
+                LaunchConfiguration("lidar_filtered_custom_topic"),
+                condition=IfCondition(LaunchConfiguration("start_lidar_self_filter")),
+            ),
+            SetLaunchConfiguration(
+                "rtabmap_livox_input_topic",
+                LaunchConfiguration("lidar_custom_topic"),
+                condition=UnlessCondition(LaunchConfiguration("start_lidar_self_filter")),
+            ),
+            IncludeLaunchDescription(
+                PythonLaunchDescriptionSource(
+                    str(sensor_share / "launch" / "lidar_self_filter.launch.py")
+                ),
+                launch_arguments={
+                    "filter_params_file": LaunchConfiguration("lidar_self_filter_params_file"),
+                    "input_topic": LaunchConfiguration("lidar_custom_topic"),
+                    "output_topic": LaunchConfiguration("lidar_filtered_custom_topic"),
+                    "platform_profile": LaunchConfiguration("platform_profile"),
+                    "geometry_source": LaunchConfiguration("lidar_self_filter_geometry_source"),
+                    "use_sim_time": LaunchConfiguration("use_sim_time"),
+                }.items(),
+                condition=IfCondition(LaunchConfiguration("start_lidar_self_filter")),
+            ),
+            IncludeLaunchDescription(
+                PythonLaunchDescriptionSource(
+                    str(sensor_share / "launch" / "livox_points.launch.py")
+                ),
+                launch_arguments={
+                    "input_topic": LaunchConfiguration("rtabmap_livox_input_topic"),
+                    "output_topic": LaunchConfiguration("lidar_topic"),
+                    "use_sim_time": LaunchConfiguration("use_sim_time"),
+                }.items(),
             ),
             # ---------------- RTAB-Map ICP odometry backend ----------------
             Node(
